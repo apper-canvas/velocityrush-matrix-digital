@@ -72,7 +72,7 @@ export default function MainFeature() {
     }
   }, [])
 
-  // Racing simulation
+// Racing simulation
   useEffect(() => {
     if (!isRacing) return
 
@@ -106,12 +106,6 @@ export default function MainFeature() {
         if (newRaceTime > 0 && Math.floor(newRaceTime) % 30 === 0 && newRaceTime !== prev.raceTime) {
           if (newLap < selectedTrack.laps) {
             newLap += 1
-            toast.success(`Lap ${newLap} completed!`)
-          } else {
-            // Race finished
-            setIsRacing(false)
-            setGameState('results')
-            toast.success('Race completed!')
           }
         }
 
@@ -127,6 +121,25 @@ export default function MainFeature() {
 
     return () => clearInterval(gameLoop)
   }, [isRacing, keys, selectedCar, selectedTrack])
+
+  // Handle lap completion notifications and race finish
+  useEffect(() => {
+    if (!isRacing) return
+    
+    const checkRaceProgress = () => {
+      if (raceData.raceTime > 0 && Math.floor(raceData.raceTime) % 30 === 0) {
+        if (raceData.currentLap < selectedTrack.laps && raceData.currentLap > 1) {
+          toast.success(`Lap ${raceData.currentLap} completed!`)
+        } else if (raceData.currentLap >= selectedTrack.laps) {
+          setIsRacing(false)
+          setGameState('results')
+          toast.success('Race completed!')
+        }
+      }
+    }
+
+    checkRaceProgress()
+  }, [raceData.currentLap, raceData.raceTime, isRacing, selectedTrack.laps])
 
   const startRace = useCallback(() => {
     setGameState('racing')
