@@ -673,16 +673,9 @@ export default function MainFeature() {
           </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-<button
-            onClick={() => {
-              // Store race configuration for race again
-              localStorage.setItem('raceConfig', JSON.stringify({
-                selectedCar,
-                selectedTrack
-              }))
-              navigate('/race')
-            }}
+<div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <button
+            onClick={startRace}
             className="racing-button"
           >
             <ApperIcon name="RotateCcw" className="w-4 h-4 mr-2" />
