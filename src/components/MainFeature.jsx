@@ -101,12 +101,26 @@ export default function MainFeature() {
         // Update race time
         const newRaceTime = prev.raceTime + 0.1
 
-        // Check lap completion (simplified)
+        // Check lap completion with proper timing and conditions
         let newLap = prev.currentLap
-        if (newRaceTime > 0 && Math.floor(newRaceTime) % 30 === 0 && newRaceTime !== prev.raceTime) {
-          if (newLap < selectedTrack.laps) {
-            newLap += 1
+        const lapTimeThreshold = 15 // seconds per lap minimum
+        const shouldAdvanceLap = newRaceTime > (lapTimeThreshold * newLap) && newLap < selectedTrack.laps
+        
+        if (shouldAdvanceLap) {
+          newLap += 1
+          // Only show lap completion toast for laps 2 and beyond (not the first lap)
+          if (newLap > 1 && newLap <= selectedTrack.laps) {
+            setTimeout(() => toast.success(`Lap ${newLap - 1} completed!`), 0)
           }
+        }
+
+        // Check race completion
+        if (newLap > selectedTrack.laps && prev.currentLap <= selectedTrack.laps) {
+          setTimeout(() => {
+            setIsRacing(false)
+            setGameState('results')
+            toast.success('Race completed!')
+          }, 0)
         }
 
         return {
@@ -120,26 +134,7 @@ export default function MainFeature() {
     }, 100)
 
     return () => clearInterval(gameLoop)
-  }, [isRacing, keys, selectedCar, selectedTrack])
-
-  // Handle lap completion notifications and race finish
-  useEffect(() => {
-    if (!isRacing) return
-    
-    const checkRaceProgress = () => {
-      if (raceData.raceTime > 0 && Math.floor(raceData.raceTime) % 30 === 0) {
-        if (raceData.currentLap < selectedTrack.laps && raceData.currentLap > 1) {
-          toast.success(`Lap ${raceData.currentLap} completed!`)
-        } else if (raceData.currentLap >= selectedTrack.laps) {
-          setIsRacing(false)
-          setGameState('results')
-          toast.success('Race completed!')
-        }
-      }
-    }
-
-    checkRaceProgress()
-  }, [raceData.currentLap, raceData.raceTime, isRacing, selectedTrack.laps])
+  }, [isRacing, keys, selectedCar, selectedTrack.laps])
 
   const startRace = useCallback(() => {
     setGameState('racing')
